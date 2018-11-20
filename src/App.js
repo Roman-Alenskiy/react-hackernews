@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './App.css';
+import './App.scss';
 
 const list = [
   {
@@ -54,24 +54,23 @@ class App extends Component {
     const {list, searchTerm} = this.state
 
     return (
-      <div className="App">
-        <Search
-          value={searchTerm}
-          onChange={this.onSearchChange}
-        >
-          <p>
-            Search
-          </p>
-        </Search>
+      <div className="page">
+        <div className="interactions">
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+          >
+            <p>
+              Search
+            </p>
+          </Search>
+        </div>
 
         <Table 
           list={list}
           pattern={searchTerm}
           onDismiss={this.onDismiss}
         >
-          <p>
-            Table
-          </p>
         </Table>
       </div>
     )
@@ -89,30 +88,40 @@ const Search = ({ value, onChange, children }) => (
   </form>
 )
 
-const Table = ({ list, pattern, onDismiss, children }) => (
-  <div>
-    {children}
-    {list.filter(isSearched(pattern.trim())).map((item) => {
-      const onHandleDismiss = () => onDismiss(item.objectID)
+const Table = ({ list, pattern, onDismiss }) => {
+  const largeColumn = {
+    width: '40%',
+  };
+  const midColumn = {
+    width: '30%',
+  };
+  const smallColumn = {
+    width: '10%',
+  }; 
 
-      return (
-        <div key={item.objectID}>
-          <span><a href={item.url}>{item.title}</a></span>
-          <span>{item.author}</span>
-          <span>{item.num_comments}</span>
-          <span>{item.points}</span>
-          <span>
-            <Button
-              onClick={onHandleDismiss}
-            >
-              Dismiss
-            </Button>
-          </span>
-        </div>
-      )
-    })}
+  return (
+    <div className="table">
+      {list.filter(isSearched(pattern.trim())).map((item) => {
+        return (
+          <div key={item.objectID} className="table-row">
+            <span style={largeColumn}><a href={item.url}>{item.title}</a></span>
+            <span style={midColumn}>{item.author}</span>
+            <span style={smallColumn}>{item.num_comments}</span>
+            <span style={smallColumn}>{item.points}</span>
+            <span style={smallColumn}>
+              <Button
+                className="button-inline"
+                onClick={() => onDismiss(item.objectID)}
+              >
+                Dismiss
+              </Button>
+            </span>
+          </div>
+        )
+      })}
   </div>
-)
+  )
+}
 
 const Button = ({ onClick, className = '', children }) => (
   <button
