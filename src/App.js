@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import './App.scss';
 
 const DEFAULT_QUERY = 'react'
+const DEFAULT_HPP = '50'
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1'
 const PATH_SEARCH = '/search'
 const PARAM_SEARCH = 'query='
+const PARAM_PAGE = 'page='
+const PARAM_HPP = 'hitsPerPage='
 
 class App extends Component {
   constructor(props) {
@@ -14,6 +17,7 @@ class App extends Component {
     this.state = {
       result: null,
       isLoading: false,
+      isLoadingMore: false,
       searchTerm: DEFAULT_QUERY,
     }
 
@@ -25,7 +29,16 @@ class App extends Component {
   }
 
   setSearchTopStories(result) {
-    this.setState({ result, isLoading: false })
+    const { hits, page } = result
+
+    const oldHits = (page !== 0) ? this.state.result.hits : []
+    const updatedHits = [...oldHits, ...hits]
+
+    this.setState({ 
+      result: {hits: updatedHits, page},
+      isLoading: false,
+      isLoadingMore: false 
+    })
   }
 
   onDismiss(id) {
@@ -44,24 +57,34 @@ class App extends Component {
     event.preventDefault()
     const { searchTerm } = this.state
     this.fetchSearchTopStories(searchTerm)
+
+    this.setState({ isLoading: true })
+  }
+
+  onSearchMore(searchTerm, page) {
+    this.setState({ isLoadingMore: true })
+
+    this.fetchSearchTopStories(searchTerm, page)
+
   }
 
   componentDidMount() {
     const { searchTerm } = this.state
+    this.setState({ isLoading: true })
     this.fetchSearchTopStories(searchTerm)
   }
 
-  fetchSearchTopStories(searchTerm) {
-    this.setState({ isLoading: true })
+  fetchSearchTopStories(searchTerm, page = 0) {
 
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error)
   }
 
   render() {
-    const {result, isLoading, searchTerm} = this.state
+    const {result, isLoading, isLoadingMore, searchTerm} = this.state
+    const page = (result && result.page) || 0
 
     return (
       <div className="page">
@@ -75,14 +98,27 @@ class App extends Component {
               Search
             </p>
           </Search>
+          { isLoading && <LoadingIndicator /> }
         </div>
-        {(isLoading || !result)
-          ? <p className="table-loading">Loading...</p>
-          : <Table 
-              list={result.hits}
-              onDismiss={this.onDismiss}
-            />
+        {
+          result &&
+          <Table 
+            list={result.hits}
+            onDismiss={this.onDismiss}
+          />
         }
+        <div className="interactions">
+          { isLoadingMore && <LoadingIndicator /> }
+          {
+            result &&
+            <Button
+              className="more-hits-btn"
+              onClick={() => this.onSearchMore(searchTerm, page + 1)}
+            >
+              More
+            </Button>
+          }
+        </div>
       </div>
     )
   }
@@ -101,7 +137,7 @@ const Search = ({ value, onChange, onSubmit, children }) => (
   </form>
 )
 
-const Table = ({ list, onDismiss }) => {
+const Table = ({ list, onDismiss, children }) => {
   const largeColumn = {
     width: '40%',
   };
@@ -132,7 +168,8 @@ const Table = ({ list, onDismiss }) => {
           </div>
         )
       })}
-  </div>
+      {children}
+    </div>
   )
 }
 
@@ -144,6 +181,10 @@ const Button = ({ onClick, className = '', children }) => (
   >
     {children}
   </button>
+)
+
+const LoadingIndicator = () => (
+  <p className="table-loading">Loading...</p>
 )
 
 export default App;
