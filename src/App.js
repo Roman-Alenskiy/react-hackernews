@@ -1,57 +1,67 @@
 import React, { Component } from 'react';
 import './App.scss';
 
-const list = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org/',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
+const DEFAULT_QUERY = 'react'
 
-const isSearched = (searchTerm) => (
-  (item) => (
-    item.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-)
+const PATH_BASE = 'https://hn.algolia.com/api/v1'
+const PATH_SEARCH = '/search'
+const PARAM_SEARCH = 'query='
 
 class App extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      list,
-      searchTerm: ''
+      result: null,
+      isLoading: false,
+      searchTerm: DEFAULT_QUERY,
     }
 
+    this.setSearchTopStories = this.setSearchTopStories.bind(this)
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this)
     this.onSearchChange = this.onSearchChange.bind(this)
+    this.onSearchSubmit = this.onSearchSubmit.bind(this)
     this.onDismiss = this.onDismiss.bind(this)
   }
 
+  setSearchTopStories(result) {
+    this.setState({ result, isLoading: false })
+  }
+
   onDismiss(id) {
-    const updatedList = this.state.list.filter((item) => {
-      return item.objectID !== id
+    const isNotId = (item) => item.objectID !== id
+    const updatedHits = this.state.result.hits.filter(isNotId)
+    this.setState({ 
+      result: {...this.state.result, hits: updatedHits}
     })
-    this.setState({ list: updatedList })
   }
 
   onSearchChange(event) {
     this.setState({ searchTerm: event.target.value})
   }
 
+  onSearchSubmit(event) {
+    event.preventDefault()
+    const { searchTerm } = this.state
+    this.fetchSearchTopStories(searchTerm)
+  }
+
+  componentDidMount() {
+    const { searchTerm } = this.state
+    this.fetchSearchTopStories(searchTerm)
+  }
+
+  fetchSearchTopStories(searchTerm) {
+    this.setState({ isLoading: true })
+
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error)
+  }
+
   render() {
-    const {list, searchTerm} = this.state
+    const {result, isLoading, searchTerm} = this.state
 
     return (
       <div className="page">
@@ -59,36 +69,39 @@ class App extends Component {
           <Search
             value={searchTerm}
             onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
           >
             <p>
               Search
             </p>
           </Search>
         </div>
-
-        <Table 
-          list={list}
-          pattern={searchTerm}
-          onDismiss={this.onDismiss}
-        >
-        </Table>
+        {(isLoading || !result)
+          ? <p className="table-loading">Loading...</p>
+          : <Table 
+              list={result.hits}
+              onDismiss={this.onDismiss}
+            />
+        }
       </div>
     )
   }
 }
 
-const Search = ({ value, onChange, children }) => (
-  <form>
-    {children}
+const Search = ({ value, onChange, onSubmit, children }) => (
+  <form onSubmit={onSubmit}>
     <input 
       type="text"
       value={value}
       onChange={onChange}
     />
+    <button type="submit">
+      {children}
+    </button>
   </form>
 )
 
-const Table = ({ list, pattern, onDismiss }) => {
+const Table = ({ list, onDismiss }) => {
   const largeColumn = {
     width: '40%',
   };
@@ -101,7 +114,7 @@ const Table = ({ list, pattern, onDismiss }) => {
 
   return (
     <div className="table">
-      {list.filter(isSearched(pattern.trim())).map((item) => {
+      {list.map((item) => {
         return (
           <div key={item.objectID} className="table-row">
             <span style={largeColumn}><a href={item.url}>{item.title}</a></span>
