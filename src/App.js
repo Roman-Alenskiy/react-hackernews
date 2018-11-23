@@ -20,6 +20,7 @@ class App extends Component {
       isLoadingMore: false,
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
+      error: null,
     }
 
     this.needToSearchTopStories = this.needToSearchTopStories.bind(this)
@@ -109,14 +110,17 @@ class App extends Component {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
-      .catch(error => error)
+      .catch(error => this.setState({ error }))
   }
 
   render() {
-    const {results, isLoading, isLoadingMore, searchTerm, searchKey} = this.state
+    const {
+      results, isLoading, isLoadingMore, 
+      searchTerm, searchKey, error
+    } = this.state
     const page = (results && results[searchKey] && results[searchKey].page) || 0
     const list = (results && results[searchKey] && results[searchKey].hits) || []
-
+    
     return (
       <div className="page">
         <div className="interactions">
@@ -129,14 +133,17 @@ class App extends Component {
               Search
             </p>
           </Search>
-          { isLoading && <LoadingIndicator /> }
+          { isLoading && !error && <LoadingIndicator /> }
         </div>
         {
-          results &&
-          <Table 
-            list={list}
-            onDismiss={this.onDismiss}
-          />
+          error
+          ? <div>
+              <p>Something went wrong :(</p>
+            </div>
+          : <Table 
+              list={list}
+              onDismiss={this.onDismiss}
+            />
         }
         <div className="interactions">
           { isLoadingMore && <LoadingIndicator /> }
