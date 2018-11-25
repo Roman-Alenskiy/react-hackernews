@@ -233,3 +233,9 @@ const LoadingIndicator = () => (
 )
 
 export default App;
+
+export {
+  Button,
+  Search,
+  Table,
+}
