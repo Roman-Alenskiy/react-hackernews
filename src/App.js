@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
-import './App.scss';
+import './App.scss'
 
 const DEFAULT_QUERY = 'react'
 const DEFAULT_HPP = '50'
@@ -170,18 +170,29 @@ class App extends Component {
   }
 }
 
-const Search = ({ value, onChange, onSubmit, children }) => (
-  <form onSubmit={onSubmit}>
-    <input 
-      type="text"
-      value={value}
-      onChange={onChange}
-    />
-    <button type="submit">
-      {children}
-    </button>
-  </form>
-)
+class Search extends Component {
+  componentDidMount() {
+    if (this.input) this.input.focus()
+  }
+
+  render() {
+    const { value, onChange, onSubmit, children } = this.props
+
+    return (
+      <form onSubmit={onSubmit}>
+        <input
+          type="text"
+          value={value}
+          onChange={onChange}
+          ref={(el) => this.input = el}
+        />
+        <button type="submit">
+          {children}
+        </button>
+      </form>
+    )
+  }
+}
 
 Search.propTypes = {
   value: PropTypes.string.isRequired,
@@ -193,13 +204,13 @@ Search.propTypes = {
 const Table = ({ list, onDismiss, children }) => {
   const largeColumn = {
     width: '40%',
-  };
+  }
   const midColumn = {
     width: '30%',
-  };
+  }
   const smallColumn = {
     width: '10%',
-  }; 
+  } 
 
   return (
     <div className="table">
@@ -263,7 +274,7 @@ const LoadingIndicator = () => (
   <p className="table-loading">Loading...</p>
 )
 
-export default App;
+export default App
 
 export {
   Button,
