@@ -206,7 +206,7 @@ const Table = ({ list, onDismiss, children }) => {
       {list.map((item) => {
         return (
           <div key={item.objectID} className="table-row">
-            <span style={largeColumn}><a href={item.url} target="_blank">{item.title}</a></span>
+            <span style={largeColumn}><a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a></span>
             <span style={midColumn}>{item.author}</span>
             <span style={smallColumn}>{item.num_comments}</span>
             <span style={smallColumn}>{item.points}</span>
