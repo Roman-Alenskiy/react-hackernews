@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios'
+import PropTypes from 'prop-types'
 import './App.scss';
 
 const DEFAULT_QUERY = 'react'
@@ -182,6 +183,13 @@ const Search = ({ value, onChange, onSubmit, children }) => (
   </form>
 )
 
+Search.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  children: PropTypes.node.isRequired,
+}
+
 const Table = ({ list, onDismiss, children }) => {
   const largeColumn = {
     width: '40%',
@@ -218,7 +226,20 @@ const Table = ({ list, onDismiss, children }) => {
   )
 }
 
-const Button = ({ onClick, className = '', children }) => (
+Table.propTypes = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      objectID: PropTypes.string.isRequired,
+      author: PropTypes.string,
+      url: PropTypes.string,
+      num_comments: PropTypes.number,
+      points: PropTypes.number
+    })
+  ).isRequired,
+  onDismiss: PropTypes.func.isRequired,
+}
+
+const Button = ({ onClick, className, children }) => (
   <button
     onClick={onClick}
     className={className}
@@ -227,6 +248,16 @@ const Button = ({ onClick, className = '', children }) => (
     {children}
   </button>
 )
+
+Button.defaultProps = {
+  className: '',
+}
+
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+}
 
 const LoadingIndicator = () => (
   <p className="table-loading">Loading...</p>
