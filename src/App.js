@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import './App.scss'
 
 const DEFAULT_QUERY = 'react'
@@ -21,7 +22,6 @@ class App extends Component {
     this.state = {
       results: null,
       isLoading: false,
-      isLoadingMore: false,
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
       error: null,
@@ -55,7 +55,6 @@ class App extends Component {
         [searchKey]: { hits: updatedHits, page }
       },
       isLoading: false,
-      isLoadingMore: false 
     })
   }
 
@@ -94,7 +93,7 @@ class App extends Component {
 
   onSearchMore(searchKey, page) {
     return () => {
-      this.setState({ isLoadingMore: true })
+      this.setState({ isLoading: true })
 
       this.fetchSearchTopStories(searchKey, page)
     }
@@ -123,8 +122,8 @@ class App extends Component {
 
   render() {
     const {
-      results, isLoading, isLoadingMore, 
-      searchTerm, searchKey, error
+      results, isLoading, searchTerm, 
+      searchKey, error
     } = this.state
     const page = (results && results[searchKey] && results[searchKey].page) || 0
     const list = (results && results[searchKey] && results[searchKey].hits) || []
@@ -141,7 +140,6 @@ class App extends Component {
               Search
             </p>
           </Search>
-          { isLoading && !error && <LoadingIndicator /> }
         </div>
         {
           error
@@ -154,16 +152,13 @@ class App extends Component {
             />
         }
         <div className="interactions">
-          { isLoadingMore && <LoadingIndicator /> }
-          {
-            results &&
-            <Button
-              className="more-hits-btn"
-              onClick={this.onSearchMore(searchKey, page + 1)}
-            >
-              More
-            </Button>
-          }
+          <ButtonWithLoading
+            className="more-hits-btn"
+            onClick={this.onSearchMore(searchKey, page + 1)}
+            isLoading={isLoading}
+          >
+            More
+          </ButtonWithLoading>
         </div>
       </div>
     )
@@ -177,7 +172,7 @@ class Search extends Component {
   }
 
   componentDidMount() {
-    this.searchInput.current.focus()
+    if (this.searchInput.current) this.searchInput.current.focus()
   }
 
   render() {
@@ -276,8 +271,18 @@ Button.propTypes = {
 }
 
 const LoadingIndicator = () => (
-  <p className="table-loading">Loading...</p>
+  <FontAwesomeIcon icon="spinner" className="loading" pulse/>
 )
+
+const withLoading = (Component) => (
+  ({ isLoading, ...rest }) => ( 
+    isLoading
+    ? <LoadingIndicator />
+    : <Component {...rest} />
+  )
+)
+
+const ButtonWithLoading = withLoading(Button)
 
 export default App
 

@@ -4,6 +4,11 @@ import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faSpinner)
+
 ReactDOM.render(<App />, document.getElementById('root'));
 
 if (module.hot) {
