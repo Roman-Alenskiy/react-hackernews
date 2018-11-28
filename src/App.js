@@ -117,7 +117,7 @@ class App extends Component {
 
     axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(result => this._isMounted && this.setSearchTopStories(result.data))
-      .catch(error => this._isMounted && this.setState({ error }))
+      .catch(error => this._isMounted && this.setState({ error, isLoading: false }))
   }
 
   render() {
@@ -141,16 +141,11 @@ class App extends Component {
             </p>
           </Search>
         </div>
-        {
-          error
-          ? <div>
-              <p>Something went wrong :(</p>
-            </div>
-          : <Table 
-              list={list}
-              onDismiss={this.onDismiss}
-            />
-        }
+        <TableWithError
+          error={error} 
+          list={list}
+          onDismiss={this.onDismiss}
+        />
         <div className="interactions">
           <ButtonWithLoading
             className="more-hits-btn"
@@ -282,7 +277,18 @@ const withLoading = (Component) => (
   )
 )
 
+const withError = (Component) => (
+  ({ error, ...rest }) => (
+    error
+    ? <div>
+        <p>Something went wrong :(</p>
+      </div>
+    : <Component {...rest} />
+  )
+)
+
 const ButtonWithLoading = withLoading(Button)
+const TableWithError = withError(Table)
 
 export default App
 
