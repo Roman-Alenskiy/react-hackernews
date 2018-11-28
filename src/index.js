@@ -5,9 +5,9 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faSpinner, faSort } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faSpinner)
+library.add(faSpinner, faSort)
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
