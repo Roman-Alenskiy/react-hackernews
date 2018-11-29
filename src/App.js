@@ -236,7 +236,6 @@ class Table extends Component {
     const {
       sortKey,
       isSortReverse,
-      onSort,
     } = this.state
 
     const largeColumn = {
