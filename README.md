@@ -8,7 +8,7 @@ This is my first React app. It refers to the amazing [The Road to learn React](h
 
 This simple application fetches data from real [Hackernews API](https://hn.algolia.com/api) and represents it the in table-like list.
 
-You can do search queries, load more (with "More" button) and dismiss particular news.
+You can do search queries, load more (with "More" button), dismiss particular news and sort them .
 
 Also, there is a caching feature. It means, that, if you search something second time, data will retrieve from local cache and not from API.
 
@@ -42,4 +42,10 @@ Create production build:
 
 ```bash
 npm run build
+```
+
+Deploy to GitHub Pages:
+
+```bash
+npm run deploy
 ```
